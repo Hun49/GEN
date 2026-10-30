@@ -5,6 +5,7 @@ import {
 	Link,
 	Outlet,
 	Scripts,
+	useRouterState,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 import Sidebar from "../components/Sidebar";
@@ -34,15 +35,23 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 // ─── App shell: sidebar + main content area ───────────────────────────────
 function AppShell() {
 	const { data: session, isPending } = useSession();
+	const pathname = useRouterState({
+		select: (state) => state.location.pathname,
+	});
+	const isAdminPage = pathname.replace(/\/+$/, "") === "/api";
 
-	// Auto sign-in anonymously once we know there's no session
 	useEffect(() => {
+		if (isAdminPage) return;
 		if (!isPending && !session) {
 			authClient.signIn.anonymous().catch(() => {
 				// silently ignore — session may already exist
 			});
 		}
-	}, [isPending, session]);
+	}, [isPending, session, isAdminPage]);
+
+	if (isAdminPage) {
+		return <Outlet />;
+	}
 
 	return (
 		<div className="flex h-screen overflow-hidden bg-[var(--bg-main)] text-[var(--text-primary)]">

@@ -44,9 +44,27 @@ export interface ChatCompletionOptions {
 	models?: readonly string[];
 }
 
+export interface TokenUsage {
+	promptTokens: number;
+	completionTokens: number;
+	totalTokens: number;
+}
+
 export interface ChatCompletionResult {
 	content: string;
 	modelUsed: string;
+	usage: TokenUsage;
+}
+
+function readUsage(data: any): TokenUsage {
+	const usage = data?.usage ?? {};
+	const promptTokens = Number(usage.prompt_tokens || 0);
+	const completionTokens = Number(usage.completion_tokens || 0);
+	return {
+		promptTokens,
+		completionTokens,
+		totalTokens: Number(usage.total_tokens || promptTokens + completionTokens),
+	};
 }
 
 /**
@@ -108,6 +126,7 @@ export async function executeAiCompletion(
 			return {
 				content: jsonMode ? cleanJsonOutput(rawContent) : rawContent,
 				modelUsed: model,
+				usage: readUsage(data),
 			};
 		} catch (err: any) {
 			const isTimeout =

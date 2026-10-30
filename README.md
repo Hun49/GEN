@@ -13,6 +13,7 @@ To run this application first:
 - **Anonymous Usage** — Start practicing instantly with zero friction; link to an email account later
 - **Public Exam Discovery** — Browse and practice exams published by other users
 - **Performance Tracking** — Historical attempts, score improvements, and mastery levels per question
+- **External API** — Generate MC and true/false exams server-to-server with project-scoped API keys and custom JSON Schema responses
 - **Dark & Light Themes** — Toggle between Dark Charcoal and Pure White themes
 
 ## Tech Stack
@@ -49,11 +50,13 @@ The dev server runs at `http://localhost:3000`.
 
 ### Environment Variables
 
-Create a `.env` file:
+Copy `.dev.vars.example` to `.dev.vars` for the local Workers runtime:
 
 ```env
+ADMIN_PASSWORD_HASH=output-from-pnpm-admin:hash
 GROQ_API_KEY=your_groq_api_key
 BETTER_AUTH_SECRET=your_auth_secret
+BETTER_AUTH_URL=http://localhost:3000
 ```
 
 Generate a Better Auth secret:
@@ -61,6 +64,14 @@ Generate a Better Auth secret:
 ```bash
 pnpm dlx @better-auth/cli secret
 ```
+
+Generate the admin console password hash:
+
+```bash
+pnpm admin:hash "your-strong-password"
+```
+
+The admin console is available at `/api`. External API documentation is in [`docs/external-api.md`](docs/external-api.md).
 
 ## Scripts
 
@@ -73,6 +84,7 @@ pnpm dlx @better-auth/cli secret
 | `pnpm check` | Lint + format check |
 | `pnpm test` | Run tests with Vitest |
 | `pnpm deploy` | Build and deploy to Cloudflare Workers |
+| `pnpm admin:hash` | Generate the admin console password hash |
 
 ## Database
 
@@ -80,7 +92,7 @@ The project uses Cloudflare D1 in production and local SQLite for development.
 
 ```bash
 pnpm db:generate   # Generate Drizzle migrations
-pnpm db:migrate    # Run migrations
+DATABASE_URL=dev.db pnpm db:migrate  # Apply migrations to local SQLite
 pnpm db:push       # Push schema changes
 pnpm db:studio     # Open Drizzle Studio
 ```
@@ -89,8 +101,9 @@ pnpm db:studio     # Open Drizzle Studio
 
 1. Install Wrangler: `npm install -g wrangler`
 2. Authenticate: `wrangler login`
-3. Set secrets: `wrangler secret put GROQ_API_KEY` and `wrangler secret put BETTER_AUTH_SECRET`
-4. Deploy: `pnpm deploy`
+3. Set secrets: `wrangler secret put GROQ_API_KEY`, `wrangler secret put BETTER_AUTH_SECRET`, and `wrangler secret put ADMIN_PASSWORD_HASH`
+4. Apply D1 migrations: `wrangler d1 migrations apply gen-db --remote`
+5. Deploy: `pnpm deploy`
 
 The `wrangler.jsonc` configures D1, R2, and Queue bindings.
 

@@ -19,9 +19,11 @@
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull",
     "db:studio": "drizzle-kit studio",
+    "admin:hash": "tsx scripts/hash-admin-password.ts",
     "test": "vitest run"
   },
   "dependencies": {
+    "@cfworker/json-schema": "^4.1.1",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-query": "latest",
     "@tanstack/react-query-devtools": "latest",

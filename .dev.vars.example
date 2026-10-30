@@ -1,0 +1,4 @@
+ADMIN_PASSWORD_HASH=replace-with-output-of-pnpm-admin:hash
+GROQ_API_KEY=replace-with-groq-api-key
+BETTER_AUTH_SECRET=replace-with-a-random-secret
+BETTER_AUTH_URL=http://localhost:3000

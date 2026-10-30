@@ -1,5 +1,11 @@
 import { sql } from "drizzle-orm";
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+	index,
+	integer,
+	sqliteTable,
+	text,
+	uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
 // ─── Better Auth Tables ───────────────────────────────────────────────────────
 export const user = sqliteTable("user", {
@@ -227,6 +233,169 @@ export const rateLimits = sqliteTable(
 	],
 );
 
+// ─── Admin Sessions ──────────────────────────────────────────────────────────
+export const adminSessions = sqliteTable(
+	"admin_sessions",
+	{
+		id: text("id").primaryKey(),
+		tokenHash: text("token_hash").notNull().unique(),
+		authVersion: text("auth_version").notNull(),
+		expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.default(sql`(unixepoch())`),
+		lastSeenAt: integer("last_seen_at", { mode: "timestamp" })
+			.notNull()
+			.default(sql`(unixepoch())`),
+	},
+	(table) => [index("idx_admin_sessions_expires_at").on(table.expiresAt)],
+);
+
+// ─── API Projects ────────────────────────────────────────────────────────────
+export const apiProjects = sqliteTable(
+	"api_projects",
+	{
+		id: text("id").primaryKey(),
+		name: text("name").notNull().unique(),
+		description: text("description"),
+		status: text("status", { enum: ["active", "disabled"] })
+			.notNull()
+			.default("active"),
+		defaultResponseSchema: text("default_response_schema"),
+		requestsPerMinute: integer("requests_per_minute").notNull().default(30),
+		requestsPerDay: integer("requests_per_day").notNull().default(200),
+		tokensPerDay: integer("tokens_per_day").notNull().default(1_000_000),
+		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.default(sql`(unixepoch())`),
+		updatedAt: integer("updated_at", { mode: "timestamp" })
+			.notNull()
+			.default(sql`(unixepoch())`),
+	},
+	(table) => [
+		index("idx_api_projects_status").on(table.status),
+		index("idx_api_projects_created_at").on(table.createdAt),
+	],
+);
+
+// ─── API Keys ────────────────────────────────────────────────────────────────
+export const apiKeys = sqliteTable(
+	"api_keys",
+	{
+		id: text("id").primaryKey(),
+		projectId: text("project_id")
+			.notNull()
+			.references(() => apiProjects.id, { onDelete: "cascade" }),
+		name: text("name"),
+		keyHash: text("key_hash").notNull().unique(),
+		keyPrefix: text("key_prefix").notNull(),
+		lastFour: text("last_four").notNull(),
+		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.default(sql`(unixepoch())`),
+		lastUsedAt: integer("last_used_at", { mode: "timestamp" }),
+		revokedAt: integer("revoked_at", { mode: "timestamp" }),
+	},
+	(table) => [
+		index("idx_api_keys_project_id").on(table.projectId),
+		index("idx_api_keys_created_at").on(table.createdAt),
+	],
+);
+
+// ─── API Usage ───────────────────────────────────────────────────────────────
+export const apiUsage = sqliteTable(
+	"api_usage",
+	{
+		id: text("id").primaryKey(),
+		projectId: text("project_id")
+			.notNull()
+			.references(() => apiProjects.id, { onDelete: "cascade" }),
+		keyId: text("key_id")
+			.notNull()
+			.references(() => apiKeys.id, { onDelete: "cascade" }),
+		requestId: text("request_id").notNull(),
+		externalId: text("external_id"),
+		statusCode: integer("status_code").notNull(),
+		outcome: text("outcome", {
+			enum: [
+				"success",
+				"validation_error",
+				"schema_error",
+				"rate_limited",
+				"quota_exceeded",
+				"generation_failed",
+				"ai_unavailable",
+				"idempotency_replay",
+				"idempotency_conflict",
+				"idempotency_in_progress",
+				"internal_error",
+			],
+		}).notNull(),
+		errorCode: text("error_code"),
+		schemaSource: text("schema_source", {
+			enum: ["default", "project", "request"],
+		}),
+		model: text("model"),
+		promptTokens: integer("prompt_tokens").notNull().default(0),
+		completionTokens: integer("completion_tokens").notNull().default(0),
+		totalTokens: integer("total_tokens").notNull().default(0),
+		questionCount: integer("question_count"),
+		difficulty: text("difficulty"),
+		subject: text("subject"),
+		latencyMs: integer("latency_ms"),
+		isReplay: integer("is_replay", { mode: "boolean" })
+			.notNull()
+			.default(false),
+		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.default(sql`(unixepoch())`),
+	},
+	(table) => [
+		index("idx_api_usage_project_created").on(table.projectId, table.createdAt),
+		index("idx_api_usage_key_created").on(table.keyId, table.createdAt),
+		index("idx_api_usage_created_at").on(table.createdAt),
+		index("idx_api_usage_request_id").on(table.requestId),
+	],
+);
+
+// ─── API Idempotency ─────────────────────────────────────────────────────────
+export const apiIdempotency = sqliteTable(
+	"api_idempotency",
+	{
+		id: text("id").primaryKey(),
+		projectId: text("project_id")
+			.notNull()
+			.references(() => apiProjects.id, { onDelete: "cascade" }),
+		keyId: text("key_id").references(() => apiKeys.id, {
+			onDelete: "set null",
+		}),
+		idempotencyKey: text("idempotency_key").notNull(),
+		requestHash: text("request_hash").notNull(),
+		status: text("status", { enum: ["in_progress", "completed"] })
+			.notNull()
+			.default("in_progress"),
+		responseStatus: integer("response_status"),
+		responseBody: text("response_body"),
+		requestId: text("request_id").notNull(),
+		model: text("model"),
+		promptTokens: integer("prompt_tokens").notNull().default(0),
+		completionTokens: integer("completion_tokens").notNull().default(0),
+		totalTokens: integer("total_tokens").notNull().default(0),
+		expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.default(sql`(unixepoch())`),
+		completedAt: integer("completed_at", { mode: "timestamp" }),
+	},
+	(table) => [
+		uniqueIndex("idx_api_idempotency_project_key").on(
+			table.projectId,
+			table.idempotencyKey,
+		),
+		index("idx_api_idempotency_expires_at").on(table.expiresAt),
+	],
+);
+
 export type User = typeof user.$inferSelect;
 export type Session = typeof session.$inferSelect;
 export type Document = typeof documents.$inferSelect;
@@ -241,3 +410,13 @@ export type AttemptAnswer = typeof attemptAnswers.$inferSelect;
 export type NewAttemptAnswer = typeof attemptAnswers.$inferInsert;
 export type RateLimit = typeof rateLimits.$inferSelect;
 export type NewRateLimit = typeof rateLimits.$inferInsert;
+export type AdminSession = typeof adminSessions.$inferSelect;
+export type NewAdminSession = typeof adminSessions.$inferInsert;
+export type ApiProject = typeof apiProjects.$inferSelect;
+export type NewApiProject = typeof apiProjects.$inferInsert;
+export type ApiKey = typeof apiKeys.$inferSelect;
+export type NewApiKey = typeof apiKeys.$inferInsert;
+export type ApiUsage = typeof apiUsage.$inferSelect;
+export type NewApiUsage = typeof apiUsage.$inferInsert;
+export type ApiIdempotency = typeof apiIdempotency.$inferSelect;
+export type NewApiIdempotency = typeof apiIdempotency.$inferInsert;

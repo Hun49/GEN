@@ -94,7 +94,7 @@ function TermsAndPrivacyPage() {
 						Terms of Service
 					</h2>
 					<p className="text-xs text-[var(--text-muted)]">
-						Last modified: January 2026
+						Last modified: October 2026
 					</p>
 				</div>
 
@@ -184,6 +184,56 @@ function TermsAndPrivacyPage() {
 							for personal, non-commercial educational use.
 						</p>
 					</div>
+
+					<div className="space-y-1.5">
+						<h3 className="font-bold text-[var(--text-primary)] text-sm">
+							6. External API Service
+						</h3>
+						<p>
+							GEN provides a server-to-server External API that generates
+							multiple-choice and true/false exams from supplied source
+							material. The endpoint is{" "}
+							<code className="text-[11px] font-mono">
+								POST https://gen.hun-wrk0966.workers.dev/api/v1/generate
+							</code>
+							, and access requires a project and API key issued through the
+							admin console at{" "}
+							<Link
+								to="/api"
+								className="font-semibold text-[var(--text-primary)] underline underline-offset-2 hover:opacity-80"
+							>
+								/api
+							</Link>
+							.
+						</p>
+						<ul className="list-disc list-inside mt-1.5 space-y-1 text-xs text-[var(--text-secondary)]">
+							<li>
+								API keys are secret credentials and are displayed only once when
+								created. Store them in a secret manager and never expose them in
+								client-side code, source repositories, or public requests.
+							</li>
+							<li>
+								Each project is subject to per-minute request, daily request,
+								and daily token limits. These are hard stops enforced
+								automatically.
+							</li>
+							<li>
+								Keys may be revoked and projects disabled at any time at our
+								discretion to prevent abuse, enforce these terms, or protect
+								platform integrity.
+							</li>
+							<li>
+								API-generated content is produced by the same artificial
+								intelligence models and is subject to the Artificial
+								Intelligence Disclaimer above.
+							</li>
+							<li>
+								Scripted abuse, scraping, distributed requests, or deliberate
+								attempts to bypass rate limiting via the External API are
+								strictly prohibited and may result in immediate revocation.
+							</li>
+						</ul>
+					</div>
 				</div>
 			</section>
 
@@ -194,7 +244,7 @@ function TermsAndPrivacyPage() {
 						Privacy Policy
 					</h2>
 					<p className="text-xs text-[var(--text-muted)]">
-						Last modified: January 2026
+						Last modified: October 2026
 					</p>
 				</div>
 
@@ -269,7 +319,32 @@ function TermsAndPrivacyPage() {
 
 					<div className="space-y-1.5">
 						<h3 className="font-bold text-[var(--text-primary)] text-sm">
-							4. Policy Amendments
+							4. External API Data Practices
+						</h3>
+						<ul className="list-disc list-inside space-y-1 text-xs text-[var(--text-secondary)]">
+							<li>
+								<strong>Usage metadata:</strong> We record request metadata only
+								— request ID, external ID, status, outcome, error code, schema
+								source, model, token usage, latency, and timestamps. Source
+								content, generated exams, schema bodies, and client IP addresses
+								are not stored in API usage records.
+							</li>
+							<li>
+								<strong>Idempotency:</strong> Completed response bodies are
+								retained for up to 24 hours solely to support safe idempotent
+								retries, then removed.
+							</li>
+							<li>
+								<strong>API keys:</strong> Keys are stored as one-way
+								cryptographic hashes. The full key is never displayed or
+								retrievable after creation.
+							</li>
+						</ul>
+					</div>
+
+					<div className="space-y-1.5">
+						<h3 className="font-bold text-[var(--text-primary)] text-sm">
+							5. Policy Amendments
 						</h3>
 						<p>
 							This Privacy Policy may be modified periodically to reflect

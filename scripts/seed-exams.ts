@@ -4,7 +4,6 @@ import { db } from '../src/db/index.ts'
 import { exams, questions } from '../src/db/schema.ts'
 
 const SAMPLE_EXAMS = [
- const SAMPLE_EXAMS = [
   {
     title: 'Computer Science: Algorithms & Data Structures',
     subject: 'Computer Science',

@@ -4,6 +4,7 @@ import {
 	ChevronLeft,
 	ChevronRight,
 	Compass,
+	KeyRound,
 	Settings,
 	Sparkles,
 	User,
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
 ];
 
 const BOTTOM_ITEMS = [
+	{ to: "/api", icon: KeyRound, label: "API" },
 	{ to: "/account", icon: User, label: "Account" },
 	{ to: "/settings", icon: Settings, label: "Settings" },
 ];
