@@ -262,9 +262,9 @@ export const apiProjects = sqliteTable(
 			.notNull()
 			.default("active"),
 		defaultResponseSchema: text("default_response_schema"),
-		requestsPerMinute: integer("requests_per_minute").notNull().default(30),
-		requestsPerDay: integer("requests_per_day").notNull().default(200),
-		tokensPerDay: integer("tokens_per_day").notNull().default(1_000_000),
+		requestsPerMinute: integer("requests_per_minute").notNull().default(10),
+		requestsPerDay: integer("requests_per_day").notNull().default(100),
+		tokensPerDay: integer("tokens_per_day").notNull().default(150_000),
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
 			.default(sql`(unixepoch())`),

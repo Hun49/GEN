@@ -213,9 +213,14 @@ function TermsAndPrivacyPage() {
 								client-side code, source repositories, or public requests.
 							</li>
 							<li>
-								Each project is subject to per-minute request, daily request,
-								and daily token limits. These are hard stops enforced
-								automatically.
+								Each project is subject to hard, automatically enforced limits:
+								10 requests per minute, 100 requests per day, and 150,000 tokens
+								per day. These defaults are configurable per project.
+							</li>
+							<li>
+								Each request accepts up to 20,000 characters of source material
+								and generates up to 10 questions (questions and answers only, no
+								explanations).
 							</li>
 							<li>
 								Keys may be revoked and projects disabled at any time at our

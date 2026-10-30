@@ -43,6 +43,13 @@
       "when": 1793281314677,
       "tag": "0005_absurd_human_robot",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1793355197226,
+      "tag": "0006_bored_romulus",
+      "breakpoints": true
     }
   ]
 }

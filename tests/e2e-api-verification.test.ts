@@ -241,10 +241,8 @@ describe("E2E Comprehensive Audit & Verification Suite", () => {
 	describe("2. P0 AI Engine & Fallback Architecture", () => {
 		it("confirms CANDIDATE_MODELS hierarchy order", () => {
 			expect(CANDIDATE_MODELS[0]).toBe("qwen/qwen3.8-27b");
-			expect(CANDIDATE_MODELS[1]).toBe("groq/compound-mini");
-			expect(CANDIDATE_MODELS[2]).toBe("openai/gpt-oss-20b");
-			expect(CANDIDATE_MODELS[3]).toBe("openai/gpt-oss-120b");
-			expect(CANDIDATE_MODELS[4]).toBe("groq/compound");
+			expect(CANDIDATE_MODELS[1]).toBe("openai/gpt-oss-20b");
+			expect(CANDIDATE_MODELS[2]).toBe("openai/gpt-oss-120b");
 		});
 
 		it("cleanJsonOutput correctly strips markdown code fences", () => {
@@ -278,7 +276,7 @@ describe("E2E Comprehensive Audit & Verification Suite", () => {
 					jsonMode: true,
 				});
 
-				expect(res.modelUsed).toBe("groq/compound-mini");
+				expect(res.modelUsed).toBe("openai/gpt-oss-20b");
 				expect(res.content).toBe("{\"title\": \"Fallback Success\"}");
 				expect(attemptsCount).toBe(2);
 			} finally {

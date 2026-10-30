@@ -7,17 +7,13 @@
  * Ranked AI model candidates for Groq API.
  * Ordered by empirical latency, JSON compliance, and reliability:
  * 1. qwen/qwen3.8-27b - Primary: Highest schema accuracy and low latency (~1.5s).
- * 2. groq/compound-mini - Fast fallback (~2.2s), optimized for high throughput structured JSON.
- * 3. openai/gpt-oss-20b - Lightweight fallback (~1.1s).
- * 4. openai/gpt-oss-120b - Heavyweight reasoning fallback.
- * 5. groq/compound - Comprehensive compound fallback.
+ * 2. openai/gpt-oss-20b - Lightweight fallback (~1.1s).
+ * 3. openai/gpt-oss-120b - Heavyweight reasoning fallback.
  */
 export const CANDIDATE_MODELS = [
 	"qwen/qwen3.8-27b",
-	"groq/compound-mini",
 	"openai/gpt-oss-20b",
 	"openai/gpt-oss-120b",
-	"groq/compound",
 ] as const;
 
 export type CandidateModel = (typeof CANDIDATE_MODELS)[number];

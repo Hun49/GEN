@@ -65,9 +65,9 @@ export const Route = createFileRoute("/api/admin/projects/")({
 					description: parsed.data.description || null,
 					status: "active" as const,
 					defaultResponseSchema: null,
-					requestsPerMinute: 30,
-					requestsPerDay: 200,
-					tokensPerDay: 1_000_000,
+					requestsPerMinute: 10,
+					requestsPerDay: 100,
+					tokensPerDay: 150_000,
 					createdAt: now,
 					updatedAt: now,
 				};

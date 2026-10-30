@@ -47,7 +47,6 @@ const validDefaultExam = {
 				{ id: "D", text: "Ribosome" },
 			],
 			correctAnswer: { id: "A", text: "Chloroplast" },
-			explanation: "Chloroplasts contain chlorophyll.",
 		},
 		{
 			number: 2,
@@ -58,7 +57,6 @@ const validDefaultExam = {
 				{ id: "F", text: "False" },
 			],
 			correctAnswer: { id: "T", text: "True" },
-			explanation: "Respiration converts glucose into usable energy.",
 		},
 	],
 };

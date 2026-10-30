@@ -8,10 +8,8 @@ import {
 describe("AI Engine & Model Fallback Hierarchy", () => {
 	it("verifies CANDIDATE_MODELS has the correct empirical priority ordering", () => {
 		expect(CANDIDATE_MODELS[0]).toBe("qwen/qwen3.8-27b");
-		expect(CANDIDATE_MODELS[1]).toBe("groq/compound-mini");
-		expect(CANDIDATE_MODELS[2]).toBe("openai/gpt-oss-20b");
-		expect(CANDIDATE_MODELS[3]).toBe("openai/gpt-oss-120b");
-		expect(CANDIDATE_MODELS[4]).toBe("groq/compound");
+		expect(CANDIDATE_MODELS[1]).toBe("openai/gpt-oss-20b");
+		expect(CANDIDATE_MODELS[2]).toBe("openai/gpt-oss-120b");
 	});
 
 	describe("cleanJsonOutput", () => {
@@ -96,7 +94,7 @@ describe("AI Engine & Model Fallback Hierarchy", () => {
 			});
 
 			expect(result.content).toBe('{"title": "Fallback Exam"}');
-			expect(result.modelUsed).toBe("groq/compound-mini");
+			expect(result.modelUsed).toBe("openai/gpt-oss-20b");
 			expect(globalThis.fetch).toHaveBeenCalledTimes(2);
 		});
 

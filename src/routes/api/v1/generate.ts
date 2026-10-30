@@ -25,18 +25,20 @@ import {
 } from "#/lib/external-exam";
 
 const MAX_BODY_BYTES = 100_000;
+const MAX_CONTENT_CHARS = 20_000;
+const MAX_QUESTIONS = 10;
 
 const RequestSchema = z
 	.object({
 		externalId: z.string().max(128).optional(),
 		content: z
 			.string()
-			.max(35_000)
+			.max(MAX_CONTENT_CHARS)
 			.refine((value) => value.trim().length > 0, "content cannot be empty"),
 		instructions: z.string().max(2_000).optional(),
 		subject: z.string().max(120).optional(),
 		difficulty: z.enum(["easy", "medium", "hard"]).default("medium"),
-		questionCount: z.number().int().min(1).max(30).default(5),
+		questionCount: z.number().int().min(1).max(MAX_QUESTIONS).default(10),
 		questionTypes: z
 			.array(z.enum(["multiple-choice", "true-false"]))
 			.min(1)

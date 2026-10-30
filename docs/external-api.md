@@ -61,19 +61,19 @@ Unknown fields are rejected with `400 VALIDATION_ERROR`.
 
 | Field | Type | Required | Default | Notes |
 | --- | --- | --- | --- | --- |
-| `content` | string | Yes | — | Source material. Maximum 35,000 characters. |
+| `content` | string | Yes | — | Source material. Maximum 20,000 characters (~5,000 tokens). |
 | `externalId` | string | No | — | Your identifier, max 128 characters. Echoed in schema, idempotency, and generation errors. |
 | `instructions` | string | No | — | Extra generation instructions, max 2,000 characters. |
 | `subject` | string | No | Auto-detect | Max 120 characters. |
 | `difficulty` | string | No | `medium` | `easy`, `medium`, or `hard`. |
-| `questionCount` | integer | No | `5` | 1–30. |
+| `questionCount` | integer | No | `10` | 1–10. |
 | `questionTypes` | array | No | `["multiple-choice"]` | Any of `multiple-choice`, `true-false`. |
 | `language` | string | No | `English` | Max 40 characters. |
 | `audience` | string | No | — | Max 80 characters. |
 | `sourceOnly` | boolean | No | `true` | When true, questions must be grounded in `content`. |
 | `responseSchema` | object | No | Project/default schema | Per-request JSON Schema override. |
 
-The total request body is limited to 100 KB.
+The total request body is limited to 100 KB, and `content` is limited to 20,000 characters. Requests return questions and answers only — no explanations.
 
 ## Responses
 
@@ -100,8 +100,7 @@ When neither the request nor the project defines a schema, GEN uses the built-in
         { "id": "C", "text": "Nucleus" },
         { "id": "D", "text": "Ribosome" }
       ],
-      "correctAnswer": { "id": "A", "text": "Chloroplast" },
-      "explanation": "Chloroplasts contain chlorophyll and carry out photosynthesis."
+      "correctAnswer": { "id": "A", "text": "Chloroplast" }
     },
     {
       "number": 2,
@@ -111,14 +110,13 @@ When neither the request nor the project defines a schema, GEN uses the built-in
         { "id": "T", "text": "True" },
         { "id": "F", "text": "False" }
       ],
-      "correctAnswer": { "id": "T", "text": "True" },
-      "explanation": "Cellular respiration converts glucose into usable energy."
+      "correctAnswer": { "id": "T", "text": "True" }
     }
   ]
 }
 ```
 
-The response has no `success` or `exam` wrapper. The successful body is exactly the schema-defined object.
+The response has no `success` or `exam` wrapper. The successful body is exactly the schema-defined object. By default GEN returns questions and answers only (no explanations). To add an `explanation` field or any other custom shape, define a custom `responseSchema`.
 
 ### Custom response schemas
 
@@ -196,7 +194,7 @@ Errors always use this envelope:
     "code": "VALIDATION_ERROR",
     "message": "The request body is invalid.",
     "details": [
-      { "path": "questionCount", "message": "Too big: expected number to be <=30" }
+      { "path": "questionCount", "message": "Too big: expected number to be <=10" }
     ]
   }
 }
@@ -224,21 +222,41 @@ Limits are configured per project in the admin console. Defaults:
 
 | Limit | Default |
 | --- | --- |
-| Requests per minute | 30 |
-| Requests per day | 200 |
-| Tokens per day | 1,000,000 |
+| Requests per minute | 10 |
+| Requests per day | 100 |
+| Tokens per day | 150,000 |
 
 Limit headers are returned on all authenticated requests:
 
 ```http
-X-RateLimit-Limit: 30
-X-RateLimit-Remaining: 29
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 9
 X-RateLimit-Reset: 1710000060
-X-Gen-Daily-Requests-Remaining: 199
-X-Gen-Daily-Tokens-Remaining: 998000
+X-Gen-Daily-Requests-Remaining: 99
+X-Gen-Daily-Tokens-Remaining: 148000
 ```
 
 A `429` response includes `Retry-After` in seconds. Limits are hard stops.
+
+### Sizing your request
+
+GEN runs on Groq models that allow **8,000 tokens per minute and 200,000 tokens per day per model** (input + output combined). Keep each request comfortably under the per-minute token budget.
+
+Rule of thumb (English text ≈ 4 characters per token):
+
+- `content` up to **20,000 characters ≈ 5,000 input tokens**
+- questions up to **10** per request
+- Q&A-only output for 10 questions ≈ **~1,000 tokens**
+- total per request ≈ **~7,000 tokens**, safely under the 8K TPM limit
+
+Practical guidance:
+
+- For a handful of questions (1–5), you can send up to ~20,000 characters of content.
+- For 10 questions, keep content around 20,000 characters or less.
+- Need more than 10 questions from the same source? Send multiple requests (one per batch of up to 10). Each request re-sends the content, so larger batches of questions per request are cheaper on your daily token quota.
+- Content larger than 20,000 characters (a long chapter) must be split by your application into chunks of 20,000 characters or less per request.
+
+Your project's `tokensPerDay` quota is the binding daily limit. At the default 150,000 tokens/day you can expect roughly 100–150 typical requests, or fewer when sending large content every time.
 
 ## Idempotency
 

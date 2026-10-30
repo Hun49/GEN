@@ -31,22 +31,15 @@ export const DEFAULT_EXAM_SCHEMA: Record<string, unknown> = {
 			type: "array",
 			items: { type: "string" },
 		},
-		questionCount: { type: "integer", minimum: 1, maximum: 30 },
+		questionCount: { type: "integer", minimum: 1, maximum: 10 },
 		questions: {
 			type: "array",
 			minItems: 1,
-			maxItems: 30,
+			maxItems: 10,
 			items: {
 				type: "object",
 				additionalProperties: false,
-				required: [
-					"number",
-					"type",
-					"question",
-					"options",
-					"correctAnswer",
-					"explanation",
-				],
+				required: ["number", "type", "question", "options", "correctAnswer"],
 				properties: {
 					number: { type: "integer", minimum: 1 },
 					type: { enum: ["multiple-choice", "true-false"] },
@@ -74,7 +67,6 @@ export const DEFAULT_EXAM_SCHEMA: Record<string, unknown> = {
 							text: { type: "string", minLength: 1 },
 						},
 					},
-					explanation: { type: "string" },
 				},
 			},
 		},
